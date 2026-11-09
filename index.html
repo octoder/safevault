@@ -3,781 +3,555 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>SafeVault - Mobile Password Manager</title>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            vault: {
-              50: '#f0fdf4',
-              500: '#10b981',
-              600: '#059669',
-              900: '#064e3b',
-              darkBg: '#0f172a',
-              cardDark: '#1e293b',
-              cardBorderDark: '#334155'
-            }
-          }
-        }
-      }
-    }
-  </script>
+  <title>SafeVault - บันทึกรหัสผ่าน</title>
+  
+  <!-- ไอคอนและตั้งค่าเว็บแอปสำหรับมือถือ -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SafeVault">
+  <meta name="theme-color" content="#0f172a">
+
   <style>
-    /* Mobile-first safe area styling and touch optimization */
-    body {
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --input-bg: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       -webkit-tap-highlight-color: transparent;
-      user-select: none;
     }
-    input, textarea {
-      user-select: auto;
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding-top: env(safe-area-inset-top, 20px);
+      padding-bottom: env(safe-area-inset-bottom, 20px);
     }
-    .safe-top {
-      padding-top: max(env(safe-area-inset-top), 1rem);
+
+    .app-container {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      gap: 16px;
     }
-    .safe-bottom {
-      padding-bottom: max(env(safe-area-inset-bottom), 1.25rem);
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
     }
-    /* Hide scrollbars for clean app look */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
+
+    .title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--primary);
     }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+
+    .btn-add {
+      background: var(--primary);
+      color: #0f172a;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    /* Search Bar */
+    .search-box {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 12px 16px;
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .search-box:focus {
+      border-color: var(--primary);
+    }
+
+    /* Account List */
+    .account-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .account-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .service-name {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .btn-delete {
+      background: none;
+      border: none;
+      color: var(--danger);
+      font-size: 0.9rem;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .field-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--input-bg);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .field-info {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      margin-right: 8px;
+    }
+
+    .field-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .field-value {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text);
+    }
+
+    .field-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 4px 6px;
+      border-radius: 4px;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--text-muted);
+      margin-top: 40px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    /* Modal Form */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 480px;
+      border-radius: 20px 20px 0 0;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transform: translateY(100%);
+      transition: transform 0.25s ease;
+      padding-bottom: calc(24px + env(safe-area-inset-bottom, 16px));
+    }
+
+    .modal-overlay.active .modal {
+      transform: translateY(0);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .form-control {
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+    }
+
+    .input-with-button {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-secondary {
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      color: var(--primary);
+      border-radius: 10px;
+      padding: 0 12px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      white-space: nowrap;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .btn-submit {
+      flex: 1;
+      background: var(--primary);
+      color: #0f172a;
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .btn-cancel {
+      flex: 1;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: calc(30px + env(safe-area-inset-bottom, 0px));
+      background: var(--primary);
+      color: #0f172a;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      font-size: 0.9rem;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+      z-index: 200;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
     }
   </style>
 </head>
-<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200 font-sans">
-  
-  <!-- Main Mobile Container (Centered on desktop, fills mobile screen) -->
-  <div class="max-w-md mx-auto min-h-screen flex flex-col relative bg-slate-50 dark:bg-slate-900 border-x border-slate-200 dark:border-slate-800 shadow-2xl">
-    
-    <!-- Top Header -->
-    <header class="safe-top px-4 pb-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-30 border-b border-slate-200/60 dark:border-slate-800">
-      <div class="flex items-center justify-between mb-3">
-        <div class="flex items-center gap-2">
-          <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
-            <i data-lucide="shield-check" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <h1 class="text-lg font-bold tracking-tight leading-none">SafeVault</h1>
-            <p class="text-xs text-slate-400 dark:text-slate-500">บันทึกรหัสผ่านส่วนตัว</p>
-          </div>
-        </div>
+<body>
 
-        <div class="flex items-center gap-1.5">
-          <!-- Password Generator Button -->
-          <button onclick="openGeneratorModal()" title="สร้างรหัสผ่าน" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors">
-            <i data-lucide="key-round" class="w-5 h-5"></i>
-          </button>
-          <!-- Dark Mode Toggle -->
-          <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors">
-            <i data-lucide="moon" id="themeIcon" class="w-5 h-5"></i>
-          </button>
-        </div>
+  <div class="app-container">
+    <header>
+      <div class="title">
+        <span>🛡️</span> SafeVault
       </div>
-
-      <!-- Search Bar -->
-      <div class="relative">
-        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-        <input 
-          type="text" 
-          id="searchInput" 
-          oninput="handleSearch()"
-          placeholder="ค้นหาชื่อบริการ, บัญชี, อีเมล..." 
-          class="w-full pl-10 pr-9 py-2.5 bg-slate-100 dark:bg-slate-800/80 rounded-xl text-sm border-none focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 dark:text-slate-100 placeholder-slate-400 transition-all"
-        />
-        <button id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-          <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
-      </div>
-
-      <!-- Category Filter Pills -->
-      <div class="flex gap-1.5 mt-2.5 overflow-x-auto no-scrollbar py-1 text-xs font-medium" id="categoryFilterContainer">
-        <!-- Rendered dynamically -->
-      </div>
+      <button class="btn-add" id="btnOpenModal" aria-label="เพิ่มบัญชี">+</button>
     </header>
 
-    <!-- Main Vault List -->
-    <main class="flex-1 px-4 py-3 space-y-3 pb-28 overflow-y-auto" id="vaultList">
-      <!-- Cards rendered via JS -->
-    </main>
+    <input type="text" class="search-box" id="searchBox" placeholder="🔍 ค้นหาชื่อบริการ หรือ อีเมล...">
 
-    <!-- Empty State -->
-    <div id="emptyState" class="hidden flex-1 flex-col items-center justify-center p-8 text-center text-slate-400">
-      <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3 text-slate-400">
-        <i data-lucide="lock" class="w-8 h-8"></i>
-      </div>
-      <h3 class="text-base font-semibold text-slate-600 dark:text-slate-300">ยังไม่มีข้อมูลบันทึก</h3>
-      <p class="text-xs mt-1 max-w-xs text-slate-400">แตะปุ่มเครื่องหมาย + ด้านล่างเพื่อเพิ่มบัญชี ชื่อผู้ใช้ และรหัสผ่านใหม่</p>
+    <div class="account-list" id="accountList">
+      <!-- ข้อมูลจะแสดงผลที่นี่ผ่าน JavaScript -->
     </div>
-
-    <!-- Floating Add Button -->
-    <div class="fixed bottom-6 max-w-md w-full px-5 pointer-events-none flex justify-end z-20">
-      <button 
-        onclick="openAddModal()" 
-        class="pointer-events-auto flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-medium px-4 py-3 rounded-full shadow-lg shadow-emerald-600/30 transition-all duration-150"
-      >
-        <i data-lucide="plus" class="w-5 h-5"></i>
-        <span class="text-sm pr-1">เพิ่มบัญชี</span>
-      </button>
-    </div>
-
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 bg-slate-900/90 dark:bg-white/90 text-white dark:text-slate-900 text-xs font-semibold px-4 py-2.5 rounded-full shadow-xl opacity-0 pointer-events-none transition-all duration-200 z-50 flex items-center gap-2">
-      <i data-lucide="check" class="w-4 h-4 text-emerald-400 dark:text-emerald-600"></i>
-      <span id="toastMessage">คัดลอกเรียบร้อยแล้ว</span>
-    </div>
-
-    <!-- Add/Edit Entry Modal -->
-    <div id="entryModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity">
-      <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl safe-bottom border-t sm:border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto no-scrollbar">
-        <div class="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
-          <h2 id="modalTitle" class="text-base font-bold text-slate-800 dark:text-slate-100">เพิ่มรายการใหม่</h2>
-          <button onclick="closeEntryModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1">
-            <i data-lucide="x" class="w-5 h-5"></i>
-          </button>
-        </div>
-
-        <form id="entryForm" onsubmit="saveEntry(event)" class="space-y-4 pt-4 text-sm">
-          <input type="hidden" id="entryId">
-
-          <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1">ชื่อบริการ / แอป (Title) *</label>
-            <input required type="text" id="titleInput" placeholder="เช่น Google, Facebook, Netflix, บัตร ATM" class="w-full px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 dark:text-white border-none">
-          </div>
-
-          <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1">อีเมล หรือ ชื่อผู้ใช้ (Email / Username) *</label>
-            <div class="relative">
-              <input required type="text" id="usernameInput" placeholder="name@example.com หรือ @username" class="w-full pl-3.5 pr-10 py-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 dark:text-white border-none">
-              <button type="button" onclick="pasteToUsername()" title="วางข้อความ" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                <i data-lucide="clipboard-paste" class="w-4 h-4"></i>
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <div class="flex justify-between items-center mb-1">
-              <label class="text-xs font-medium text-slate-500">รหัสผ่าน (Password) *</label>
-              <button type="button" onclick="openGeneratorModal(true)" class="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1 hover:underline">
-                <i data-lucide="sparkles" class="w-3 h-3"></i> สุ่มรหัสผ่าน
-              </button>
-            </div>
-            <div class="relative">
-              <input required type="password" id="passwordInput" placeholder="••••••••••••" class="w-full pl-3.5 pr-20 py-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 dark:text-white border-none font-mono">
-              <div class="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-slate-400">
-                <button type="button" onclick="togglePasswordVisibility('passwordInput', 'toggleModalEye')" class="p-1 hover:text-slate-600 dark:hover:text-slate-200">
-                  <i data-lucide="eye" id="toggleModalEye" class="w-4 h-4"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1">หมวดหมู่ (Category)</label>
-            <select id="categoryInput" class="w-full px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 dark:text-white border-none appearance-none">
-              <option value="ทั่วไป">ทั่วไป (General)</option>
-              <option value="โซเชียล">โซเชียล (Social Media)</option>
-              <option value="อีเมล">อีเมลและการทำงาน (Work & Email)</option>
-              <option value="การเงิน">การเงินและธนาคาร (Finance)</option>
-              <option value="บันเทิง">บันเทิงและเกม (Entertainment)</option>
-              <option value="ช้อปปิ้ง">ช้อปปิ้ง (Shopping)</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-xs font-medium text-slate-500 mb-1">บันทึกเพิ่มเติม (Notes - ตัวเลือกเสริม)</label>
-            <textarea id="notesInput" rows="2" placeholder="เช่น คำถามความปลอดภัย, รหัส PIN, ลิงก์ล็อกอิน" class="w-full px-3.5 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 text-slate-800 dark:text-white border-none text-xs"></textarea>
-          </div>
-
-          <div class="flex gap-2 pt-2">
-            <button type="button" onclick="closeEntryModal()" class="flex-1 py-3 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 rounded-xl font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-              ยกเลิก
-            </button>
-            <button type="submit" class="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-500 transition-colors shadow-md shadow-emerald-600/30">
-              บันทึก
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Password Generator Modal -->
-    <div id="generatorModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div class="w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-2xl p-5 shadow-2xl safe-bottom border-t sm:border border-slate-200 dark:border-slate-800">
-        <div class="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
-          <div class="flex items-center gap-2">
-            <i data-lucide="key" class="w-5 h-5 text-emerald-500"></i>
-            <h2 class="text-base font-bold text-slate-800 dark:text-slate-100">เครื่องมือสุ่มรหัสผ่านปลอดภัย</h2>
-          </div>
-          <button onclick="closeGeneratorModal()" class="text-slate-400 hover:text-slate-600 p-1">
-            <i data-lucide="x" class="w-5 h-5"></i>
-          </button>
-        </div>
-
-        <div class="py-4 space-y-4">
-          <!-- Generated Output Box -->
-          <div class="p-3.5 bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-between border border-slate-200 dark:border-slate-700">
-            <span id="genResult" class="font-mono text-base font-bold tracking-wider text-emerald-600 dark:text-emerald-400 select-all break-all mr-2">Ab#9sL!2k8</span>
-            <div class="flex items-center gap-1 shrink-0">
-              <button onclick="generateRandomPassword()" title="สุ่มใหม่" class="p-2 text-slate-500 hover:text-emerald-500">
-                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-              </button>
-              <button onclick="copyGeneratedPassword()" title="คัดลอก" class="p-2 text-slate-500 hover:text-emerald-500">
-                <i data-lucide="copy" class="w-4 h-4"></i>
-              </button>
-            </div>
-          </div>
-
-          <!-- Controls -->
-          <div class="space-y-3 text-xs text-slate-600 dark:text-slate-300 font-medium">
-            <div>
-              <div class="flex justify-between mb-1">
-                <span>ความยาวรหัสผ่าน: <strong id="lengthValue">16</strong> ตัวอักษร</span>
-              </div>
-              <input type="range" id="lengthSlider" min="8" max="32" value="16" oninput="updateGenOptions()" class="w-full accent-emerald-500">
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 pt-1">
-              <label class="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg cursor-pointer">
-                <input type="checkbox" id="includeUppercase" checked onchange="generateRandomPassword()" class="rounded text-emerald-600 focus:ring-emerald-500">
-                <span>ตัวใหญ่ (A-Z)</span>
-              </label>
-              <label class="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg cursor-pointer">
-                <input type="checkbox" id="includeLowercase" checked onchange="generateRandomPassword()" class="rounded text-emerald-600 focus:ring-emerald-500">
-                <span>ตัวเล็ก (a-z)</span>
-              </label>
-              <label class="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg cursor-pointer">
-                <input type="checkbox" id="includeNumbers" checked onchange="generateRandomPassword()" class="rounded text-emerald-600 focus:ring-emerald-500">
-                <span>ตัวเลข (0-9)</span>
-              </label>
-              <label class="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg cursor-pointer">
-                <input type="checkbox" id="includeSymbols" checked onchange="generateRandomPassword()" class="rounded text-emerald-600 focus:ring-emerald-500">
-                <span>สัญลักษณ์ (!@#$)</span>
-              </label>
-            </div>
-          </div>
-
-          <div class="flex gap-2 pt-2">
-            <button onclick="closeGeneratorModal()" class="w-1/3 py-2.5 text-xs text-slate-500 bg-slate-100 dark:bg-slate-800 rounded-xl font-medium">
-              ปิด
-            </button>
-            <button id="useGeneratedBtn" onclick="applyGeneratedToForm()" class="flex-1 py-2.5 text-xs bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-500">
-              นำไปใส่ในฟอร์มทันที
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-      <div class="w-full max-w-xs bg-white dark:bg-slate-900 rounded-2xl p-5 shadow-2xl border border-slate-200 dark:border-slate-800 text-center">
-        <div class="w-12 h-12 rounded-full bg-rose-500/10 text-rose-500 mx-auto flex items-center justify-center mb-3">
-          <i data-lucide="trash-2" class="w-6 h-6"></i>
-        </div>
-        <h3 class="text-sm font-bold text-slate-800 dark:text-white">ยืนยันการลบข้อมูล</h3>
-        <p class="text-xs text-slate-500 mt-1">คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้? ข้อมูลจะไม่สามารถกู้คืนได้</p>
-        <div class="flex gap-2 mt-4">
-          <button onclick="closeDeleteModal()" class="flex-1 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 rounded-lg">ยกเลิก</button>
-          <button id="confirmDeleteBtn" class="flex-1 py-2 text-xs font-medium text-white bg-rose-600 rounded-lg hover:bg-rose-500">ลบทันที</button>
-        </div>
-      </div>
-    </div>
-
   </div>
 
+  <!-- Modal สำหรับเพิ่มข้อมูล -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <h3 style="font-size: 1.25rem;">บันทึกบัญชีใหม่</h3>
+      
+      <div class="form-group">
+        <label>ชื่อบริการ / เว็บไซต์</label>
+        <input type="text" id="inputService" class="form-control" placeholder="เช่น Facebook, Gmail, Netflix" required>
+      </div>
+
+      <div class="form-group">
+        <label>อีเมล หรือ ชื่อผู้ใช้</label>
+        <input type="text" id="inputEmail" class="form-control" placeholder="name@example.com" required>
+      </div>
+
+      <div class="form-group">
+        <label>รหัสผ่าน</label>
+        <div class="input-with-button">
+          <input type="text" id="inputPassword" class="form-control" style="flex:1;" placeholder="รหัสผ่าน" required>
+          <button type="button" class="btn-secondary" id="btnGenPass">สุ่มรหัส</button>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" id="btnCancelModal">ยกเลิก</button>
+        <button type="button" class="btn-submit" id="btnSaveAccount">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Alert -->
+  <div class="toast" id="toast">คัดลอกสำเร็จ!</div>
+
   <script>
-    // State management
-    const STORAGE_KEY = 'safevault_accounts_v1';
-    let accounts = [];
-    let currentFilter = 'ทั้งหมด';
-    let deleteTargetId = null;
-    let isCalledFromForm = false;
+    // จัดการ LocalStorage
+    const STORAGE_KEY = 'safevault_accounts';
+    let accounts = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 
-    // Load initial accounts
-    function loadAccounts() {
-      try {
-        const data = localStorage.getItem(STORAGE_KEY);
-        if (data) {
-          accounts = JSON.parse(data);
-        } else {
-          // Sample default accounts for first-time onboarding
-          accounts = [
-            {
-              id: '1',
-              title: 'Google / Gmail',
-              username: 'somchai.tech@gmail.com',
-              password: 'P@ssword2026Secure!',
-              category: 'อีเมล',
-              notes: 'บัญชีหลักสำหรับทำงานและ backup มือถือ',
-              updatedAt: new Date().toISOString()
-            },
-            {
-              id: '2',
-              title: 'Facebook',
-              username: '0812345678',
-              password: 'FB#SafeKey998!',
-              category: 'โซเชียล',
-              notes: '',
-              updatedAt: new Date().toISOString()
-            }
-          ];
-          saveToLocalStorage();
-        }
-      } catch (e) {
-        console.error('Failed to parse localStorage', e);
-        accounts = [];
-      }
-      renderCategories();
-      renderVault();
-    }
+    // อ้างอิง DOM Elements
+    const accountList = document.getElementById('accountList');
+    const searchBox = document.getElementById('searchBox');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const btnOpenModal = document.getElementById('btnOpenModal');
+    const btnCancelModal = document.getElementById('btnCancelModal');
+    const btnSaveAccount = document.getElementById('btnSaveAccount');
+    const btnGenPass = document.getElementById('btnGenPass');
+    const toast = document.getElementById('toast');
 
-    function saveToLocalStorage() {
+    const inputService = document.getElementById('inputService');
+    const inputEmail = document.getElementById('inputEmail');
+    const inputPassword = document.getElementById('inputPassword');
+
+    // บันทึกและดึงข้อมูล
+    function saveToStorage() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
     }
 
-    // Render category filters
-    function renderCategories() {
-      const defaultCategories = ['ทั้งหมด', 'ทั่วไป', 'โซเชียล', 'อีเมล', 'การเงิน', 'บันเทิง', 'ช้อปปิ้ง'];
-      const container = document.getElementById('categoryFilterContainer');
-      container.innerHTML = defaultCategories.map(cat => {
-        const isActive = currentFilter === cat;
-        return `
-          <button 
-            onclick="setCategoryFilter('${cat}')" 
-            class="px-3 py-1 rounded-full whitespace-nowrap transition-colors ${
-              isActive 
-                ? 'bg-emerald-600 text-white shadow-sm' 
-                : 'bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'
-            }">
-            ${cat}
-          </button>
-        `;
-      }).join('');
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
     }
 
-    function setCategoryFilter(cat) {
-      currentFilter = cat;
-      renderCategories();
-      renderVault();
-    }
-
-    // Render Vault List Cards
-    function renderVault() {
-      const container = document.getElementById('vaultList');
-      const emptyState = document.getElementById('emptyState');
-      const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
-
-      const filtered = accounts.filter(acc => {
-        const matchesCategory = currentFilter === 'ทั้งหมด' || acc.category === currentFilter;
-        const matchesSearch = !searchTerm || 
-          acc.title.toLowerCase().includes(searchTerm) ||
-          acc.username.toLowerCase().includes(searchTerm) ||
-          (acc.notes && acc.notes.toLowerCase().includes(searchTerm));
-        return matchesCategory && matchesSearch;
-      });
-
-      if (filtered.length === 0) {
-        container.innerHTML = '';
-        emptyState.classList.remove('hidden');
-        return;
-      }
-
-      emptyState.classList.add('hidden');
-      container.innerHTML = filtered.map(acc => {
-        const safeId = acc.id;
-        return `
-          <div class="bg-white dark:bg-slate-800/90 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm transition-all hover:shadow-md">
-            
-            <!-- Header: Title, Category Badge, Action menu -->
-            <div class="flex items-start justify-between gap-2 mb-2.5">
-              <div class="flex items-center gap-2.5">
-                <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center font-bold text-slate-700 dark:text-slate-200 uppercase text-base">
-                  ${acc.title.charAt(0)}
-                </div>
-                <div>
-                  <h3 class="font-bold text-slate-900 dark:text-white leading-tight text-sm">${escapeHtml(acc.title)}</h3>
-                  <span class="inline-block text-[10px] font-medium px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 mt-0.5">
-                    ${escapeHtml(acc.category || 'ทั่วไป')}
-                  </span>
-                </div>
-              </div>
-
-              <!-- Edit & Delete Buttons -->
-              <div class="flex items-center gap-1">
-                <button onclick="editEntry('${safeId}')" title="แก้ไข" class="p-1.5 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-                  <i data-lucide="pencil" class="w-4 h-4"></i>
-                </button>
-                <button onclick="openDeleteModal('${safeId}')" title="ลบ" class="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-                  <i data-lucide="trash-2" class="w-4 h-4"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- Email / Username Row -->
-            <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-900/60 rounded-xl mb-2">
-              <div class="flex flex-col min-w-0 pr-2">
-                <span class="text-[10px] uppercase font-bold text-slate-400">ชื่อผู้ใช้ / อีเมล</span>
-                <span class="text-xs font-medium text-slate-700 dark:text-slate-200 truncate select-all">${escapeHtml(acc.username)}</span>
-              </div>
-              <button onclick="copyToClipboard('${escapeJs(acc.username)}', 'คัดลอกอีเมลแล้ว!')" class="p-2 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 active:scale-90 transition-transform">
-                <i data-lucide="copy" class="w-4 h-4"></i>
-              </button>
-            </div>
-
-            <!-- Password Row -->
-            <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-900/60 rounded-xl">
-              <div class="flex flex-col min-w-0 pr-2">
-                <span class="text-[10px] uppercase font-bold text-slate-400">รหัสผ่าน</span>
-                <span id="pwd-text-${safeId}" class="text-xs font-mono font-medium text-slate-700 dark:text-slate-200 truncate tracking-wider">••••••••••••</span>
-              </div>
-              <div class="flex items-center gap-1">
-                <button onclick="toggleCardPassword('${safeId}', '${escapeJs(acc.password)}')" class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 active:scale-90 transition-transform">
-                  <i data-lucide="eye" id="pwd-icon-${safeId}" class="w-4 h-4"></i>
-                </button>
-                <button onclick="copyToClipboard('${escapeJs(acc.password)}', 'คัดลอกรหัสผ่านแล้ว!')" class="p-2 text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 active:scale-90 transition-transform">
-                  <i data-lucide="copy" class="w-4 h-4"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- Optional Note -->
-            ${acc.notes ? `
-              <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400 flex items-start gap-1.5">
-                <i data-lucide="file-text" class="w-3.5 h-3.5 shrink-0 mt-0.5"></i>
-                <span class="break-words">${escapeHtml(acc.notes)}</span>
-              </div>
-            ` : ''}
-
-          </div>
-        `;
-      }).join('');
-
-      lucide.createIcons();
-    }
-
-    // Password visibility in card list
-    function toggleCardPassword(id, realPassword) {
-      const label = document.getElementById(`pwd-text-${id}`);
-      const icon = document.getElementById(`pwd-icon-${id}`);
-      if (!label) return;
-
-      const isHidden = label.innerText === '••••••••••••';
-      if (isHidden) {
-        label.innerText = realPassword;
-        label.classList.add('text-emerald-600', 'dark:text-emerald-400');
-        icon.setAttribute('data-lucide', 'eye-off');
-      } else {
-        label.innerText = '••••••••••••';
-        label.classList.remove('text-emerald-600', 'dark:text-emerald-400');
-        icon.setAttribute('data-lucide', 'eye');
-      }
-      lucide.createIcons();
-    }
-
-    // Toggle password in modal input
-    function togglePasswordVisibility(inputId, iconId) {
-      const input = document.getElementById(inputId);
-      const icon = document.getElementById(iconId);
-      if (input.type === 'password') {
-        input.type = 'text';
-        icon.setAttribute('data-lucide', 'eye-off');
-      } else {
-        input.type = 'password';
-        icon.setAttribute('data-lucide', 'eye');
-      }
-      lucide.createIcons();
-    }
-
-    // Copy to clipboard with toast notification
-    function copyToClipboard(text, customMessage) {
-      if (!navigator.clipboard) {
-        // Fallback
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-        showToast(customMessage || 'คัดลอกสำเร็จ');
-        return;
-      }
+    function copyToClipboard(text, fieldName) {
       navigator.clipboard.writeText(text).then(() => {
-        showToast(customMessage || 'คัดลอกสำเร็จ');
-      }).catch(err => {
+        showToast(`คัดลอก ${fieldName} แล้ว`);
+      }).catch(() => {
         showToast('ไม่สามารถคัดลอกได้');
       });
     }
 
-    // Toast Notification logic
-    let toastTimeout;
-    function showToast(message) {
-      const toast = document.getElementById('toast');
-      const toastMessage = document.getElementById('toastMessage');
-      toastMessage.innerText = message;
-      toast.classList.remove('opacity-0', '-translate-y-2');
-      toast.classList.add('opacity-100', 'translate-y-2');
-
-      clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => {
-        toast.classList.remove('opacity-100', 'translate-y-2');
-        toast.classList.add('opacity-0', '-translate-y-2');
-      }, 2000);
-    }
-
-    // Paste from clipboard into username field
-    async function pasteToUsername() {
-      try {
-        if (navigator.clipboard && navigator.clipboard.readText) {
-          const text = await navigator.clipboard.readText();
-          document.getElementById('usernameInput').value = text;
-          showToast('วางข้อความแล้ว');
-        }
-      } catch (err) {
-        showToast('ไม่ได้รับอนุญาตให้อ่านคลิปบอร์ด');
-      }
-    }
-
-    // Add / Edit Modal Controls
-    function openAddModal() {
-      document.getElementById('modalTitle').innerText = 'เพิ่มบัญชีใหม่';
-      document.getElementById('entryId').value = '';
-      document.getElementById('entryForm').reset();
-      document.getElementById('passwordInput').type = 'password';
-      document.getElementById('toggleModalEye').setAttribute('data-lucide', 'eye');
-      document.getElementById('entryModal').classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function editEntry(id) {
-      const item = accounts.find(a => a.id === id);
-      if (!item) return;
-
-      document.getElementById('modalTitle').innerText = 'แก้ไขบัญชี';
-      document.getElementById('entryId').value = item.id;
-      document.getElementById('titleInput').value = item.title;
-      document.getElementById('usernameInput').value = item.username;
-      document.getElementById('passwordInput').value = item.password;
-      document.getElementById('categoryInput').value = item.category || 'ทั่วไป';
-      document.getElementById('notesInput').value = item.notes || '';
-
-      document.getElementById('passwordInput').type = 'password';
-      document.getElementById('toggleModalEye').setAttribute('data-lucide', 'eye');
-
-      document.getElementById('entryModal').classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function closeEntryModal() {
-      document.getElementById('entryModal').classList.add('hidden');
-    }
-
-    function saveEntry(e) {
-      e.preventDefault();
-      const id = document.getElementById('entryId').value;
-      const title = document.getElementById('titleInput').value.trim();
-      const username = document.getElementById('usernameInput').value.trim();
-      const password = document.getElementById('passwordInput').value;
-      const category = document.getElementById('categoryInput').value;
-      const notes = document.getElementById('notesInput').value.trim();
-
-      if (!title || !username || !password) return;
-
-      if (id) {
-        // Edit existing
-        const index = accounts.findIndex(a => a.id === id);
-        if (index !== -1) {
-          accounts[index] = {
-            ...accounts[index],
-            title,
-            username,
-            password,
-            category,
-            notes,
-            updatedAt: new Date().toISOString()
-          };
-          showToast('บันทึกการแก้ไขแล้ว');
-        }
-      } else {
-        // Create new
-        const newEntry = {
-          id: Date.now().toString(),
-          title,
-          username,
-          password,
-          category,
-          notes,
-          updatedAt: new Date().toISOString()
-        };
-        accounts.unshift(newEntry);
-        showToast('เพิ่มรายการใหม่แล้ว');
-      }
-
-      saveToLocalStorage();
-      renderVault();
-      closeEntryModal();
-    }
-
-    // Delete Modal controls
-    function openDeleteModal(id) {
-      deleteTargetId = id;
-      document.getElementById('deleteModal').classList.remove('hidden');
-      document.getElementById('confirmDeleteBtn').onclick = confirmDelete;
-    }
-
-    function closeDeleteModal() {
-      deleteTargetId = null;
-      document.getElementById('deleteModal').classList.add('hidden');
-    }
-
-    function confirmDelete() {
-      if (!deleteTargetId) return;
-      accounts = accounts.filter(a => a.id !== deleteTargetId);
-      saveToLocalStorage();
-      renderVault();
-      closeDeleteModal();
-      showToast('ลบรายการเรียบร้อย');
-    }
-
-    // Search input handling
-    function handleSearch() {
-      const val = document.getElementById('searchInput').value;
-      const clearBtn = document.getElementById('clearSearchBtn');
-      if (val.length > 0) {
-        clearBtn.classList.remove('hidden');
-      } else {
-        clearBtn.classList.add('hidden');
-      }
-      renderVault();
-    }
-
-    function clearSearch() {
-      document.getElementById('searchInput').value = '';
-      document.getElementById('clearSearchBtn').classList.add('hidden');
-      renderVault();
-    }
-
-    // Password Generator
-    function openGeneratorModal(fromForm = false) {
-      isCalledFromForm = fromForm;
-      const applyBtn = document.getElementById('useGeneratedBtn');
-      if (isCalledFromForm) {
-        applyBtn.classList.remove('hidden');
-      } else {
-        applyBtn.classList.add('hidden');
-      }
-      generateRandomPassword();
-      document.getElementById('generatorModal').classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function closeGeneratorModal() {
-      document.getElementById('generatorModal').classList.add('hidden');
-    }
-
-    function updateGenOptions() {
-      const len = document.getElementById('lengthSlider').value;
-      document.getElementById('lengthValue').innerText = len;
-      generateRandomPassword();
-    }
-
     function generateRandomPassword() {
-      const length = parseInt(document.getElementById('lengthSlider').value, 10);
-      const incUpper = document.getElementById('includeUppercase').checked;
-      const incLower = document.getElementById('includeLowercase').checked;
-      const incNums = document.getElementById('includeNumbers').checked;
-      const incSyms = document.getElementById('includeSymbols').checked;
+      const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
+      let pass = "";
+      for (let i = 0; i < 14; i++) {
+        pass += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return pass;
+    }
 
-      let charset = '';
-      if (incUpper) charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-      if (incLower) charset += 'abcdefghijklmnopqrstuvwxyz';
-      if (incNums) charset += '0123456789';
-      if (incSyms) charset += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+    // เรนเดอร์การ์ดรายการ
+    function renderAccounts(filter = '') {
+      accountList.innerHTML = '';
+      const filtered = accounts.filter(acc => 
+        acc.service.toLowerCase().includes(filter.toLowerCase()) ||
+        acc.email.toLowerCase().includes(filter.toLowerCase())
+      );
 
-      if (!charset) {
-        charset = 'abcdefghijklmnopqrstuvwxyz';
+      if (filtered.length === 0) {
+        accountList.innerHTML = `
+          <div class="empty-state">
+            <p>ยังไม่มีรายการบันทึก</p>
+            <p style="font-size:0.85rem; margin-top:4px;">กดปุ่ม <b>+</b> ด้านบนเพื่อเริ่มบันทึกรหัสผ่าน</p>
+          </div>
+        `;
+        return;
       }
 
-      let generated = '';
-      // Secure random values using crypto
-      const array = new Uint32Array(length);
-      window.crypto.getRandomValues(array);
-      for (let i = 0; i < length; i++) {
-        generated += charset[array[i] % charset.length];
-      }
+      filtered.forEach((acc) => {
+        const card = document.createElement('div');
+        card.className = 'account-card';
 
-      document.getElementById('genResult').innerText = generated;
+        card.innerHTML = `
+          <div class="card-header">
+            <span class="service-name">${escapeHtml(acc.service)}</span>
+            <button class="btn-delete" onclick="deleteAccount('${acc.id}')">ลบ</button>
+          </div>
+          
+          <div class="field-row">
+            <div class="field-info">
+              <span class="field-label">อีเมล / ไอดี</span>
+              <span class="field-value">${escapeHtml(acc.email)}</span>
+            </div>
+            <div class="field-actions">
+              <button class="icon-btn" onclick="copyToClipboard('${escapeJs(acc.email)}', 'อีเมล')">คัดลอก</button>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field-info">
+              <span class="field-label">รหัสผ่าน</span>
+              <span class="field-value" id="pass-${acc.id}">••••••••</span>
+            </div>
+            <div class="field-actions">
+              <button class="icon-btn" onclick="togglePasswordView('${acc.id}', '${escapeJs(acc.password)}')">ดู</button>
+              <button class="icon-btn" onclick="copyToClipboard('${escapeJs(acc.password)}', 'รหัสผ่าน')">คัดลอก</button>
+            </div>
+          </div>
+        `;
+        accountList.appendChild(card);
+      });
     }
 
-    function copyGeneratedPassword() {
-      const text = document.getElementById('genResult').innerText;
-      copyToClipboard(text, 'คัดลอกรหัสผ่านใหม่แล้ว');
-    }
-
-    function applyGeneratedToForm() {
-      const text = document.getElementById('genResult').innerText;
-      document.getElementById('passwordInput').value = text;
-      closeGeneratorModal();
-      showToast('ใส่รหัสผ่านในฟอร์มแล้ว');
-    }
-
-    // Dark/Light Theme Switch
-    function toggleTheme() {
-      const isDark = document.documentElement.classList.toggle('dark');
-      localStorage.setItem('safevault_theme', isDark ? 'dark' : 'light');
-      updateThemeIcon(isDark);
-    }
-
-    function updateThemeIcon(isDark) {
-      const icon = document.getElementById('themeIcon');
-      if (icon) {
-        icon.setAttribute('data-lucide', isDark ? 'sun' : 'moon');
-        lucide.createIcons();
-      }
-    }
-
-    function initTheme() {
-      const savedTheme = localStorage.getItem('safevault_theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-        document.documentElement.classList.add('dark');
-        updateThemeIcon(true);
+    // Toggle ซ่อน/ดูรหัสผ่าน
+    window.togglePasswordView = function(id, actualPassword) {
+      const passElem = document.getElementById(`pass-${id}`);
+      if (passElem.textContent === '••••••••') {
+        passElem.textContent = actualPassword;
       } else {
-        document.documentElement.classList.remove('dark');
-        updateThemeIcon(false);
+        passElem.textContent = '••••••••';
       }
-    }
-
-    // Utility escape functions for XSS prevention
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-    function escapeJs(str) {
-      if (!str) return '';
-      return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
-    }
-
-    // Init on load
-    window.onload = function() {
-      initTheme();
-      loadAccounts();
-      lucide.createIcons();
     };
+
+    // ลบรายการ
+    window.deleteAccount = function(id) {
+      if (confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?')) {
+        accounts = accounts.filter(acc => acc.id !== id);
+        saveToStorage();
+        renderAccounts(searchBox.value);
+        showToast('ลบรายการสำเร็จ');
+      }
+    };
+
+    // ป้องกัน XSS Injection
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    function escapeJs(text) {
+      return text.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+
+    // การทำงานของ Modal
+    btnOpenModal.addEventListener('click', () => {
+      inputService.value = '';
+      inputEmail.value = '';
+      inputPassword.value = '';
+      modalOverlay.classList.add('active');
+    });
+
+    btnCancelModal.addEventListener('click', () => {
+      modalOverlay.classList.remove('active');
+    });
+
+    btnGenPass.addEventListener('click', () => {
+      inputPassword.value = generateRandomPassword();
+    });
+
+    btnSaveAccount.addEventListener('click', () => {
+      const service = inputService.value.trim();
+      const email = inputEmail.value.trim();
+      const password = inputPassword.value.trim();
+
+      if (!service || !email || !password) {
+        alert('กรุณากรอกข้อมูลให้ครบทุกช่อง');
+        return;
+      }
+
+      const newAccount = {
+        id: Date.now().toString(),
+        service,
+        email,
+        password
+      };
+
+      accounts.unshift(newAccount);
+      saveToStorage();
+      renderAccounts(searchBox.value);
+      modalOverlay.classList.remove('active');
+      showToast('บันทึกสำเร็จ');
+    });
+
+    // ค้นหา
+    searchBox.addEventListener('input', (e) => {
+      renderAccounts(e.target.value);
+    });
+
+    // เริ่มต้นแสดงผล
+    renderAccounts();
   </script>
 </body>
 </html>
